@@ -1,4 +1,4 @@
-
+# apologies, it's a bit rough but will get you started
 
 # install msys2
 
@@ -41,11 +41,7 @@ windows {
 
 
 # start the build in msys2
-qmake pgmodeler.pro
-make
-make install
-cd build
-windeployqt --compiler-runtime pgmodeler.exe
+
 
 # set some cmd line variables
 QT_ROOT=/c/CompileTools/MSYS2/mingw64/share/qt5/
@@ -94,10 +90,9 @@ cp /c/CompileTools/MSYS2/mingw64/bin/libstdc++-6.dll .
 cp /c/CompileTools/MSYS2/mingw64/bin/libwinpthread-1.dll .
 cp /c/CompileTools/MSYS2/mingw64/bin/libicuuc65.dll .
 cp /c/CompileTools/MSYS2/mingw64/bin/libdouble-conversion.dll .
+
+# When in doubt you can simply copy all *.dll
 cp /c/CompileTools/MSYS2/mingw64/bin/*.dll .
-
-
-
 
 
 # Create the Windows installer
