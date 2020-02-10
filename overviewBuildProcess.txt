@@ -1,0 +1,115 @@
+
+
+# install msys2
+
+https://www.msys2.org/
+
+
+
+# install dependancies
+
+https://github.com/miniwark/miniwark-howtos/blob/master/build_pgModeler0.9.0_for_Windows_64-bit.md
+
+pacman -Syuu
+pacman -S pacman base-devel mingw-w64-x86_64-toolchain git
+pacman -S mingw-w64-x86_64-qt5 mingw-w64-x86_64-postgresql mingw-w64-x86_64-libxml2
+
+
+# clone pgmodeler 
+git clone https://github.com/pgmodeler/pgmodeler.git
+cd pgmodeler
+git checkout master
+
+
+
+
+# Modify the file - pgmodeler.pri
+# If you have installed PostgreSQL and libxml2 with pacman, you need to edit the pgmodeler.pri file to point to the needed libraries like this:
+
+windows {
+  !defined(PGSQL_LIB, var): PGSQL_LIB = C:/CompileTools/MSYS2/mingw64/bin/libpq.dll
+  !defined(PGSQL_INC, var): PGSQL_INC = C:/CompileTools/MSYS2/mingw64/include
+  !defined(XML_INC, var): XML_INC = C:/CompileTools/MSYS2/mingw64/include/libxml2
+  !defined(XML_LIB, var): XML_LIB = C:/CompileTools/MSYS2/mingw64/bin/libxml2-2.dll
+
+  # Workaround to solve bug of timespec struct on MingW + PostgreSQL < 9.4
+  QMAKE_CXXFLAGS+="-DHAVE_STRUCT_TIMESPEC"
+
+  INCLUDEPATH += "$$PGSQL_INC" "$$XML_INC"
+}
+
+
+
+# start the build in msys2
+qmake pgmodeler.pro
+make
+make install
+cd build
+windeployqt --compiler-runtime pgmodeler.exe
+
+# set some cmd line variables
+QT_ROOT=/c/CompileTools/MSYS2/mingw64/share/qt5/
+INSTALLATION_ROOT=/c/PostGres/pgmodeler
+
+qmake -r CONFIG+=release PREFIX=$INSTALLATION_ROOT pgmodeler.pro
+make && make install
+cd $INSTALLATION_ROOT
+windeployqt pgmodeler.exe pgmodeler_ui.dll
+
+
+
+# Copy the required DLL files
+#The /build directory is not yet complete, we need to add manually the DLLs of the 
+# libraries than the windeployqt command have missed. Most of the missing dependencies are related to postreSQL.
+
+# It is required to manually add them to the the /build directory. 
+# To know the missing libraries, just double-click on /build/pgModeler.exe and it will give 
+# you messages about the missing DLLs.
+
+# As the time of this writing, do the following commands inside the /build directory to copy the missing DLLs:
+
+cp /c/CompileTools/MSYS2/mingw64/bin/libeay32.dll .
+cp /c/CompileTools/MSYS2/mingw64/bin/libfreetype-6.dll .
+cp /c/CompileTools/MSYS2/mingw64/bin/libglib-2.0-0.dll .
+cp /c/CompileTools/MSYS2/mingw64/bin/libgraphite2.dll .
+cp /c/CompileTools/MSYS2/mingw64/bin/libharfbuzz-0.dll .
+cp /c/CompileTools/MSYS2/mingw64/bin/libiconv-2.dll .
+cp /c/CompileTools/MSYS2/mingw64/bin/libicudt58.dll .
+cp /c/CompileTools/MSYS2/mingw64/bin/libicuin58.dll .
+cp /c/CompileTools/MSYS2/mingw64/bin/libicuuc58.dll .
+cp /c/CompileTools/MSYS2/mingw64/bin/libintl-8.dll .
+cp /c/CompileTools/MSYS2/mingw64/bin/liblzma-5.dll .
+cp /c/CompileTools/MSYS2/mingw64/bin/libpcre-1.dll .
+cp /c/CompileTools/MSYS2/mingw64/bin/libpcre2-16-0.dll .
+cp /c/CompileTools/MSYS2/mingw64/bin/libpng16-16.dll .
+cp /c/CompileTools/MSYS2/mingw64/bin/libpq.dll .
+cp /c/CompileTools/MSYS2/mingw64/bin/libxml2-2.dll .
+cp /c/CompileTools/MSYS2/mingw64/bin/libbz2-1.dll .
+cp /c/CompileTools/MSYS2/mingw64/bin/Qt5Networkd.dll .
+cp /c/CompileTools/MSYS2/mingw64/bin/Qt5PrintSupportd.dll .
+cp /c/CompileTools/MSYS2/mingw64/bin/ssleay32.dll .
+cp /c/CompileTools/MSYS2/mingw64/bin/zlib1.dll .
+cp /c/CompileTools/MSYS2/mingw64/bin/libgcc_s_seh-1.dll .
+cp /c/CompileTools/MSYS2/mingw64/bin/libstdc++-6.dll .
+cp /c/CompileTools/MSYS2/mingw64/bin/libwinpthread-1.dll .
+cp /c/CompileTools/MSYS2/mingw64/bin/libicuuc65.dll .
+cp /c/CompileTools/MSYS2/mingw64/bin/libdouble-conversion.dll .
+cp /c/CompileTools/MSYS2/mingw64/bin/*.dll .
+
+
+
+
+
+# Create the Windows installer
+# By now, you can already run pgModeler directly by double-clicking it inside 
+# the /build directory, but if you want to create an installer, and have nice short-cuts in Windows 
+# you nees to create the installer with the help of InnoSetup. 
+# What legends they are for making this!
+
+http://www.jrsoftware.org/isdl.php
+
+
+# Build the package with the graphical Inno Setup Compiler from your start menu. 
+# You will have to point to the pgmodeler.iss file witch will be somewhere like
+# C:\CompileTools\MSYS2\pgmodeler\source_pgmodeler\installer\windows
+
